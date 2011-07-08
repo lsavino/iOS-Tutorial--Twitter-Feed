@@ -8,8 +8,6 @@
 
 #import "TwitterFeedAppDelegate.h"
 
-#import "TwitterFeedViewController.h"
-
 @implementation TwitterFeedAppDelegate
 
 
@@ -21,8 +19,15 @@
 {
 	// Override point for customization after application launch.
 	 
+	
+
+	viewController = [[TweetFeedViewController alloc] init];
 	self.window.rootViewController = self.viewController;
+	[self.window addSubview:[viewController view]];
 	[self.window makeKeyAndVisible];
+	
+
+	
     return YES;
 }
 

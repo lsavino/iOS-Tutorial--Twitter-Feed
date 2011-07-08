@@ -7,15 +7,18 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "TweetFeedViewController.h"
 
-@class TwitterFeedViewController;
+@class TweetFeedViewController;
 
 @interface TwitterFeedAppDelegate : NSObject <UIApplicationDelegate> {
+	
+	TweetFeedViewController* viewController;
 
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;
 
-@property (nonatomic, retain) IBOutlet TwitterFeedViewController *viewController;
+@property (nonatomic, retain) IBOutlet TweetFeedViewController *viewController;
 
 @end
