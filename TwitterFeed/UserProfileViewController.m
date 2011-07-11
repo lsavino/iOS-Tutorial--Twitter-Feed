@@ -3,7 +3,6 @@
 //  TwitterFeed
 //
 //  Created by Laura Savino on 7/8/11.
-//  Copyright 2011 Ubermind. All rights reserved.
 //
 
 #import "UserProfileViewController.h"

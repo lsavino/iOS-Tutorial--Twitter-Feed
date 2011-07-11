@@ -3,7 +3,6 @@
 //  TwitterFeed
 //
 //  Created by Laura Savino on 7/1/11.
-//  Copyright 2011 Ubermind. All rights reserved.
 //
 
 #import "TwitterFeedAppDelegate.h"

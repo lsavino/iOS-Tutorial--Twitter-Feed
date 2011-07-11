@@ -3,7 +3,6 @@
 //  TwitterFeed
 //
 //  Created by Laura Savino on 7/3/11.
-//  Copyright 2011 Ubermind. All rights reserved.
 //
 
 #import "TwitterFeedAppDelegate.h" //Debug: is this a bad idea? How do we know we're not creating a retain cycle by referencing the parent?
