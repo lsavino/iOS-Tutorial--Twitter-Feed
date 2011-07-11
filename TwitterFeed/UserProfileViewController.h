@@ -7,13 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Tweet.h"
 
-
-@interface UserProfileViewController : UIViewController {
-    
+@interface UserProfileViewController : UITableViewController <UIAlertViewDelegate> {
 }
 
 @property (nonatomic, retain) NSString *userScreenName;
-@property (nonatomic, retain) IBOutlet UILabel *userScreenNameDisplayed;
+@property (nonatomic, retain) NSMutableArray *userTweetStream;
+
+-(void) returnToMainScreen;
 
 @end

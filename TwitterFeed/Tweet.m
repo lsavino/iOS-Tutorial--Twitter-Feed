@@ -23,6 +23,11 @@
 	return self;
 }
 
+-(id) initWithTweetText: (NSString*) tweetTextContent{
+	[self initWithName:nil tweetTextContent:tweetTextContent URL:nil];
+	return self;
+}
+
 -(NSString *) description{
 	return [NSString stringWithFormat:@"screenName: %@, tweetText: %@", screenName, tweetText];
 }

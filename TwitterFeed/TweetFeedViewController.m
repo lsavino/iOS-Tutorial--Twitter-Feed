@@ -6,7 +6,7 @@
 //  Copyright 2011 Ubermind. All rights reserved.
 //
 
-#import "TwitterFeedAppDelegate.h"
+#import "TwitterFeedAppDelegate.h" //Debug: is this a bad idea? How do we know we're not creating a retain cycle by referencing the parent?
 #import "TweetFeedViewController.h"
 #import "JSONKit.h"
 
@@ -33,6 +33,12 @@
 	return [tweetTexts count];
 }
 
+- (void) alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+	if(buttonIndex == 1){
+		[self loadUniversalTweetStream];
+	}
+}
+
 - (UITableViewCell *) tableView:(UITableView *)tableView 
 		  cellForRowAtIndexPath:(NSIndexPath *)indexPath{
 	
@@ -48,8 +54,8 @@
 		[[cell textLabel] setText:tweetText.screenName];
 		[[cell imageView] setImage:tweetText.userPhoto];
 
-		cell.detailTextLabel.lineBreakMode = UILineBreakModeTailTruncation;
-		cell.detailTextLabel.numberOfLines = 3;
+		[cell.detailTextLabel setLineBreakMode:UILineBreakModeTailTruncation];
+		[cell.detailTextLabel setNumberOfLines:3];
 		[[cell detailTextLabel] setText:tweetText.tweetText];
 
 	}
@@ -63,17 +69,18 @@
 }
 
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
-	NSLog(@"selected row %d", [indexPath row]);
+	[tableView deselectRowAtIndexPath:indexPath animated:YES];
+	
 	TwitterFeedAppDelegate *appDelegate = (TwitterFeedAppDelegate*)[[UIApplication sharedApplication] delegate];
 	UINavigationController *navigationController = appDelegate.navigationController;
 	if(userProfileViewController == nil){
-		userProfileViewController = [[UserProfileViewController alloc] initWithNibName:@"UserProfile" bundle:[NSBundle mainBundle]];
+		userProfileViewController = [[UserProfileViewController alloc] init];
 	}
 	
-	userProfileViewController.userScreenName = [[tweetTexts objectAtIndex:[indexPath row]] screenName];
+	[userProfileViewController setUserScreenName:[[tweetTexts objectAtIndex:[indexPath row]] screenName]];
 	[navigationController pushViewController:userProfileViewController animated:YES];
-
-	NSLog(@"after calling pushViewController");
+	[userProfileViewController release];
+	userProfileViewController = nil;
 
 }
 
@@ -98,15 +105,20 @@
 - (void)viewDidLoad
 {//Debug: I'd actually like this to run before the view loads, and for the table view to load after this method returns. Is there a method to that effect?
     [super viewDidLoad];
+	[self setTitle:@"Recent tweets"];
+	[self loadUniversalTweetStream];
+}
+
+
+- (void) loadUniversalTweetStream{
 	NSURL *feedURL = [NSURL URLWithString:@"https://api.twitter.com/statuses/public_timeline.json"];
-//	NSURL *feedURL = [NSURL URLWithString:@"https://awefawoeighlariueghiaeruksiergh.com"];
+	//NSURL *feedURL = [NSURL URLWithString:@"https://awefawoeighlariueghiaeruksiergh.com"];
 	NSURLRequest *twitterRequest = [NSURLRequest requestWithURL:feedURL];
 	
-//Callback when Twitter feed data is complete
+	//Callback when Twitter feed data is complete
 	void (^tweetFeedBlock)(NSData*) = ^(NSData *data){
 		[self setTweets:[data objectFromJSONData]];
 		tweetTexts = [[NSMutableArray alloc] init];
-		
 		
 		NSDictionary *tweetCurrent;
 		NSDictionary *user;
@@ -121,7 +133,6 @@
 			tweetText = [[Tweet alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
 			
 			tweetURLRequest = [[URLWrapper alloc] initWithURLRequest:[NSURLRequest requestWithURL:photoURL] connectionCompleted:^(NSData *data){
-				NSLog(@"user: %@", [tweetText screenName]);
 				UIImage *userPhoto = [[UIImage alloc] initWithData:data];
 				[tweetText setUserPhoto:userPhoto];
 				[userPhoto release];
@@ -132,23 +143,27 @@
 			
 			[tweetTexts addObject:tweetText];
 			[tweetText release];
-
+			
 			[tweetURLRequest release]; 
-
+			
 		}
 	};
 	
 	void (^failBlock)() = ^(){
 		NSLog(@"Fail callback.");
+		UIAlertView *tweetConnectionFail = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Connection error; please try again." delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:@"retry", nil];
+		[tweetConnectionFail show];
+		[tweetConnectionFail release];
+		
 	};
 	
 	URLWrapper *tweetFeedRequest = [[URLWrapper alloc] initWithURLRequest:twitterRequest connectionCompleted:tweetFeedBlock connectionFailed:failBlock];
 	[tweetFeedRequest start];
 	[tweetFeedRequest release];
+	
 
 }
 
-	
 - (void)viewDidUnload
 {
     [super viewDidUnload];

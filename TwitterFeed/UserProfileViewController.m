@@ -7,19 +7,29 @@
 //
 
 #import "UserProfileViewController.h"
-
+#import "URLWrapper.h"
+#import "JSONKit.h" //Debug: These aren't part of the public 'interface'--so should they be in the header or here?
 
 @implementation UserProfileViewController
 
 @synthesize userScreenName = m_userScreenName;
-@synthesize userScreenNameDisplayed = m_userScreenNameDisplayed;
+@synthesize userTweetStream = m_userTweetStream;
+
+
+- (id)init{
+	[super initWithStyle:UITableViewStyleGrouped];
+	return self;
+}
+
+- (id) initWithStyle:(UITableViewStyle)style{
+	return [self init];
+}
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         // Custom initialization
-		NSLog(@"initializing with nibName: %@", nibNameOrNil);
     }
     return self;
 }
@@ -38,6 +48,31 @@
     // Release any cached data, images, etc that aren't in use.
 }
 
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
+	return 70;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+	return [[self userTweetStream] count];
+}
+
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
+	if(cell == nil){
+		[cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"UITableViewCell"] autorelease];
+	}
+	
+	if([indexPath row] < [[self userTweetStream] count]){
+		NSString *tweetCurrent = [[[self userTweetStream] objectAtIndex:[indexPath row]] tweetText];
+		[cell.detailTextLabel setText: tweetCurrent];
+		[cell.detailTextLabel setLineBreakMode:UILineBreakModeTailTruncation];
+		[cell.detailTextLabel setNumberOfLines:0];
+	}
+	
+	return cell;
+}
+
 #pragma mark - View lifecycle
 
 
@@ -45,22 +80,60 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	NSLog(@"userProfile viewDidLoad");
 }
 
 - (void) viewWillAppear:(BOOL)animated{
-	NSLog(@"view will appear");
-	[self.userScreenNameDisplayed setText:self.userScreenName];
-//	[m_userScreenNameDisplayed setText:@"setting text on m_"];
+	[self setTitle:self.userScreenName];
+//	NSURLRequest *tweetStreamRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1/statuses/user_timeline/%@.json", [self userScreenName]]]];
+	
+	NSURLRequest *tweetStreamRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1/statuses/user_timeline/%@.json", @"LeonardoDoreen4"]]];
+	
+	
+	self.userTweetStream = [[NSMutableArray alloc] init];
+	
+	URLWrapper *tweetStreamConnection = [[URLWrapper alloc] initWithURLRequest:tweetStreamRequest connectionCompleted:^(NSData *data){
+		NSArray *tweetStreamFull = [data objectFromJSONData];
+		if ([(NSDictionary*)tweetStreamFull objectForKey:@"error"]) {
+			UIAlertView *userProfileAlert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"There was an error loading the requested user. Please choose another user." delegate:self cancelButtonTitle:@"ok" otherButtonTitles:nil];
+			[userProfileAlert show];
+			[userProfileAlert release];
+		}
+		else{
+			NSMutableDictionary *tweetDataFull;
+			Tweet *tweet;
+			for(int i = 0; i < [tweetStreamFull count]; i++){
+				tweetDataFull = [tweetStreamFull objectAtIndex:i];
+				tweet = [[Tweet alloc] initWithTweetText: [tweetDataFull objectForKey:@"text"]];
+				[self.userTweetStream addObject:tweet];
+				[tweet release];
+			}
+			[[self tableView] reloadData];
+			tweetStreamFull = nil;
+		}
+	}];
+	
+	[tweetStreamConnection start];
+	[tweetStreamConnection release];
+	
+	
 	[super viewWillAppear:animated];
 
+}
+
+- (void)returnToMainScreen{
+	
+}
+
+- (void)viewWillDisappear:(BOOL)animated{
+	
+	[super viewWillDisappear:animated];
 }
 
 - (void)viewDidUnload
 {
     [super viewDidUnload];
-	[self setUserScreenName:nil];
-    // Release any retained subviews of the main view.
+	self.userScreenName = nil;
+	// Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 }
 

@@ -22,7 +22,7 @@
 @property (retain) UIImage *userPhoto;
 
 -(id) initWithName: (NSString*) name tweetTextContent:(NSString*) tweetTextContent URL:(NSURL*) URL; 
-
+-(id) initWithTweetText: (NSString*) tweetTextContent;
 
 -(NSString *) description;
 @end

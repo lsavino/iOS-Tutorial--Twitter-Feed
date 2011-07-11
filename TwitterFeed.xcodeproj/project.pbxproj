@@ -11,7 +11,6 @@
 		DA598DB313C135EA00D16CEE /* Tweet.m in Sources */ = {isa = PBXBuildFile; fileRef = DA598DB213C135EA00D16CEE /* Tweet.m */; };
 		DA598DB813C1459400D16CEE /* TweetFeedViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DA598DB613C1459400D16CEE /* TweetFeedViewController.m */; };
 		DA9BD92113C7AD62006AD1EC /* UserProfileViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = DA9BD92013C7AD61006AD1EC /* UserProfileViewController.m */; };
-		DA9BD92313C7ADAE006AD1EC /* UserProfile.xib in Resources */ = {isa = PBXBuildFile; fileRef = DA9BD92213C7ADAE006AD1EC /* UserProfile.xib */; };
 		DAD0C10C13BEE3C300AB78C1 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAD0C10B13BEE3C300AB78C1 /* UIKit.framework */; };
 		DAD0C10E13BEE3C300AB78C1 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAD0C10D13BEE3C300AB78C1 /* Foundation.framework */; };
 		DAD0C11013BEE3C300AB78C1 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DAD0C10F13BEE3C300AB78C1 /* CoreGraphics.framework */; };
@@ -47,7 +46,6 @@
 		DA598DB613C1459400D16CEE /* TweetFeedViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TweetFeedViewController.m; sourceTree = "<group>"; };
 		DA9BD91F13C7AD61006AD1EC /* UserProfileViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserProfileViewController.h; sourceTree = "<group>"; };
 		DA9BD92013C7AD61006AD1EC /* UserProfileViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserProfileViewController.m; sourceTree = "<group>"; };
-		DA9BD92213C7ADAE006AD1EC /* UserProfile.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UserProfile.xib; sourceTree = "<group>"; };
 		DAD0C10713BEE3C300AB78C1 /* TwitterFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TwitterFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DAD0C10B13BEE3C300AB78C1 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		DAD0C10D13BEE3C300AB78C1 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -127,7 +125,6 @@
 			children = (
 				DAD0C11A13BEE3C300AB78C1 /* TwitterFeedAppDelegate.h */,
 				DAD0C11B13BEE3C300AB78C1 /* TwitterFeedAppDelegate.m */,
-				DA9BD92213C7ADAE006AD1EC /* UserProfile.xib */,
 				DA9BD91F13C7AD61006AD1EC /* UserProfileViewController.h */,
 				DA9BD92013C7AD61006AD1EC /* UserProfileViewController.m */,
 				DAD0C14413BEF26600AB78C1 /* JSONKit.h */,
@@ -247,7 +244,6 @@
 			files = (
 				DAD0C11613BEE3C300AB78C1 /* InfoPlist.strings in Resources */,
 				DAD0C11F13BEE3C300AB78C1 /* MainWindow.xib in Resources */,
-				DA9BD92313C7ADAE006AD1EC /* UserProfile.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

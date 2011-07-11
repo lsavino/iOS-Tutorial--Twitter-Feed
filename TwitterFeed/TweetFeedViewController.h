@@ -11,11 +11,13 @@
 #import "URLWrapper.h"
 #import "UserProfileViewController.h"
 
-@interface TweetFeedViewController : UITableViewController {
+@interface TweetFeedViewController : UITableViewController <UIAlertViewDelegate> { 
 	NSMutableArray *tweetTexts;
 	UserProfileViewController *userProfileViewController;
 }
 
 @property (retain) NSMutableArray *tweets;
+
+- (void) loadUniversalTweetStream;
 
 @end
