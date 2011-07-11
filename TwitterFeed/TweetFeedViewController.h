@@ -7,11 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "Candidate.h"
+#import "Tweet.h"
 #import "URLWrapper.h"
+#import "UserProfileViewController.h"
 
 @interface TweetFeedViewController : UITableViewController {
-	NSMutableArray *candidates;
+	NSMutableArray *tweetTexts;
+	UserProfileViewController *userProfileViewController;
 }
 
 @property (retain) NSMutableArray *tweets;

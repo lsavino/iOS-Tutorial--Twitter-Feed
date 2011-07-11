@@ -6,6 +6,7 @@
 //  Copyright 2011 Ubermind. All rights reserved.
 //
 
+#import "TwitterFeedAppDelegate.h"
 #import "TweetFeedViewController.h"
 #import "JSONKit.h"
 
@@ -29,23 +30,27 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-	return [[self tweets] count];
+	return [tweetTexts count];
 }
 
 - (UITableViewCell *) tableView:(UITableView *)tableView 
 		  cellForRowAtIndexPath:(NSIndexPath *)indexPath{
 	
-	UITableViewCell *cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"UITableViewCell"] autorelease]; 
+	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
 	
-	if([candidates count]){
-		Candidate *candidate = [candidates objectAtIndex:[indexPath row]];
+	if(cell == nil){
+		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"UITableViewCell"] autorelease]; 
+	}
+	
+	if([indexPath row] < [tweetTexts count]){
+		Tweet *tweetText = [tweetTexts objectAtIndex:[indexPath row]];
 
-		[[cell textLabel] setText:candidate.screenName];
-		[[cell imageView] setImage:candidate.userPhoto];
+		[[cell textLabel] setText:tweetText.screenName];
+		[[cell imageView] setImage:tweetText.userPhoto];
 
 		cell.detailTextLabel.lineBreakMode = UILineBreakModeTailTruncation;
 		cell.detailTextLabel.numberOfLines = 3;
-		[[cell detailTextLabel] setText:candidate.tweetText];
+		[[cell detailTextLabel] setText:tweetText.tweetText];
 
 	}
 
@@ -57,10 +62,26 @@
 	return 100;
 }
 
+- (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+	NSLog(@"selected row %d", [indexPath row]);
+	TwitterFeedAppDelegate *appDelegate = (TwitterFeedAppDelegate*)[[UIApplication sharedApplication] delegate];
+	UINavigationController *navigationController = appDelegate.navigationController;
+	if(userProfileViewController == nil){
+		userProfileViewController = [[UserProfileViewController alloc] initWithNibName:@"UserProfile" bundle:[NSBundle mainBundle]];
+	}
+	
+	userProfileViewController.userScreenName = [[tweetTexts objectAtIndex:[indexPath row]] screenName];
+	[navigationController pushViewController:userProfileViewController animated:YES];
+
+	NSLog(@"after calling pushViewController");
+
+}
+
 - (void)dealloc
 {
-	[candidates release];
+	[tweetTexts release];
 	[tweets release];
+	[userProfileViewController release];
     [super dealloc];
 }
 
@@ -77,46 +98,48 @@
 - (void)viewDidLoad
 {//Debug: I'd actually like this to run before the view loads, and for the table view to load after this method returns. Is there a method to that effect?
     [super viewDidLoad];
-//	NSURL *feedURL = [NSURL URLWithString:@"https://api.twitter.com/statuses/public_timeline.json"];
-	NSURL *feedURL = [NSURL URLWithString:@"https://awefawoeighlariueghiaeruksiergh.com"];
-	NSURLRequest *twitterRequest = [NSURLRequest requestWithURL:feedURL cachePolicy:NSURLRequestReloadIgnoringCacheData timeoutInterval:30];
+	NSURL *feedURL = [NSURL URLWithString:@"https://api.twitter.com/statuses/public_timeline.json"];
+//	NSURL *feedURL = [NSURL URLWithString:@"https://awefawoeighlariueghiaeruksiergh.com"];
+	NSURLRequest *twitterRequest = [NSURLRequest requestWithURL:feedURL];
 	
 //Callback when Twitter feed data is complete
 	void (^tweetFeedBlock)(NSData*) = ^(NSData *data){
 		[self setTweets:[data objectFromJSONData]];
-		candidates = [[NSMutableArray alloc] init];
+		tweetTexts = [[NSMutableArray alloc] init];
 		
 		
 		NSDictionary *tweetCurrent;
 		NSDictionary *user;
-		Candidate *candidate;
+		Tweet *tweetText;
 		NSURL *photoURL;
 		URLWrapper *tweetURLRequest;
-		//Fill candidates from tweets:
+		//Fill tweetTexts from tweets:
 		for(int i = 0; i < [tweets count]; i++){
 			tweetCurrent = [tweets objectAtIndex:i];
 			user = [tweetCurrent objectForKey:@"user"];
 			photoURL = [NSURL URLWithString:[user objectForKey:@"profile_image_url"]];
-			candidate = [[Candidate alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
+			tweetText = [[Tweet alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
 			
 			tweetURLRequest = [[URLWrapper alloc] initWithURLRequest:[NSURLRequest requestWithURL:photoURL] connectionCompleted:^(NSData *data){
-				NSLog(@"user: %@", [candidate screenName]);
+				NSLog(@"user: %@", [tweetText screenName]);
 				UIImage *userPhoto = [[UIImage alloc] initWithData:data];
-				[candidate setUserPhoto:userPhoto];
+				[tweetText setUserPhoto:userPhoto];
 				[userPhoto release];
 				[[self tableView] reloadData];
 			}];
 			
 			[tweetURLRequest start];
 			
-			[candidates addObject:candidate];
-			[candidate release];
+			[tweetTexts addObject:tweetText];
+			[tweetText release];
+
 			[tweetURLRequest release]; 
+
 		}
 	};
 	
 	void (^failBlock)() = ^(){
-		NSLog(@"Fail.");
+		NSLog(@"Fail callback.");
 	};
 	
 	URLWrapper *tweetFeedRequest = [[URLWrapper alloc] initWithURLRequest:twitterRequest connectionCompleted:tweetFeedBlock connectionFailed:failBlock];
@@ -131,6 +154,8 @@
     [super viewDidUnload];
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
+	[userProfileViewController release];
+	userProfileViewController = nil;
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

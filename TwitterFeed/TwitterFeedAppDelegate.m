@@ -12,6 +12,8 @@
 
 
 @synthesize window=_window;
+@synthesize userProfileViewController = _userProfileViewController;
+@synthesize navigationController = m_navigationController;
 
 @synthesize viewController=_viewController;
 
@@ -19,14 +21,16 @@
 {
 	// Override point for customization after application launch.
 	 
-	
-
 	viewController = [[TweetFeedViewController alloc] init];
-	self.window.rootViewController = self.viewController;
-	[self.window addSubview:[viewController view]];
-	[self.window makeKeyAndVisible];
+	self.navigationController = [[UINavigationController alloc] initWithRootViewController:viewController];
+	[viewController release];
 	
-
+	[self.window addSubview:[self.navigationController view]];
+	
+	
+//	userProfileViewController = [[UserProfileViewController alloc] init];
+//	[self.window addSubview:[userProfileViewController view]];
+	[self.window makeKeyAndVisible];
 	
     return YES;
 }
