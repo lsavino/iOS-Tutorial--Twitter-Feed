@@ -5,9 +5,6 @@
 //  Created by Laura Savino on 7/8/11.
 //
 
-#import <UIKit/UIKit.h>
-#import "Tweet.h"
-
 @interface UserProfileViewController : UITableViewController <UIAlertViewDelegate> {
 }
 

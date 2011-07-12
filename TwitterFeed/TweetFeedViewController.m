@@ -5,14 +5,19 @@
 //  Created by Laura Savino on 7/3/11.
 //
 
-#import "TwitterFeedAppDelegate.h" //Debug: is this a bad idea? How do we know we're not creating a retain cycle by referencing the parent?
+
+#import <UIKit/UIKit.h>
+
+#import "UserProfileViewController.h"
 #import "TweetFeedViewController.h"
 #import "JSONKit.h"
+#import "Tweet.h"
+#import "URLWrapper.h"
 
 
 @implementation TweetFeedViewController
 
-@synthesize tweets;
+@synthesize tweets, tweetTexts, userProfileViewController;
 
 - (id)init{
 	// JSS: initializers are allowed to return an object different from the
@@ -31,11 +36,9 @@
     return [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
 }
 
-// JSS: try to group protocol methods in a meaningful way, so that they're all
+// JSS:x try to group protocol methods in a meaningful way, so that they're all
 // easy to find
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-	return [tweetTexts count];
-}
+
 
 - (void) alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
 	// JSS: try not to use magic numbers -- UIAlertView has properties for
@@ -43,6 +46,10 @@
 	if(buttonIndex == 1){
 		[self loadUniversalTweetStream];
 	}
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+	return [self.tweetTexts count];
 }
 
 - (UITableViewCell *) tableView:(UITableView *)tableView 
@@ -56,8 +63,8 @@
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"UITableViewCell"] autorelease]; 
 	}
 	
-	if([indexPath row] < [tweetTexts count]){
-		Tweet *tweetText = [tweetTexts objectAtIndex:[indexPath row]];
+	if([indexPath row] < [self.tweetTexts count]){
+		Tweet *tweetText = [self.tweetTexts objectAtIndex:[indexPath row]];
 
 		// JSS: you can use dot-syntax for all these too, if you'd like
 		[[cell textLabel] setText:tweetText.screenName];
@@ -80,30 +87,29 @@
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 	
-	// JSS: you don't need to go to the app delegate for this -- this view
+	// JSS:x you don't need to go to the app delegate for this -- this view
 	// controller has a "navigationViewController" property
-	TwitterFeedAppDelegate *appDelegate = (TwitterFeedAppDelegate*)[[UIApplication sharedApplication] delegate];
-	UINavigationController *navigationController = appDelegate.navigationController;
-	if(userProfileViewController == nil){
-		userProfileViewController = [[UserProfileViewController alloc] init];
+	if(self.userProfileViewController == nil){
+		self.userProfileViewController = [[UserProfileViewController alloc] init];
 	}
 	
 	// JSS: too much nesting! break it down!
-	[userProfileViewController setUserScreenName:[[tweetTexts objectAtIndex:[indexPath row]] screenName]];
+	NSInteger row = [indexPath row];
+	Tweet *currentTweet = [self.tweetTexts objectAtIndex:row];
+	[self.userProfileViewController setUserScreenName:[currentTweet screenName]];
 
-	[navigationController pushViewController:userProfileViewController animated:YES];
-	[userProfileViewController release];
-	userProfileViewController = nil;
+	[self.navigationController pushViewController:self.userProfileViewController animated:YES];
+	self.userProfileViewController = nil;
 
 }
 
 - (void)dealloc
 {
-	// JSS: prefer setting properties to nil to calling -release (since it stays
+	// JSS:x prefer setting properties to nil to calling -release (since it stays
 	// correct regardless of the property's memory management semantics)
-	[tweetTexts release];
-	[tweets release];
-	[userProfileViewController release];
+	self.tweetTexts = nil;
+	self.tweets = nil;
+	self.userProfileViewController = nil;
     [super dealloc];
 }
 
@@ -117,6 +123,15 @@
 
 #pragma mark - View lifecycle
 
+- (void)viewWillAppear:(BOOL)animated{
+	[super viewWillAppear:animated];
+	
+	// JSS:x it's bad form to start loading data from the network in
+	// -viewDidLoad, as the view controller may not actually be getting
+	// presented immediately -- use -viewWillAppear: for that instead
+	[self loadUniversalTweetStream];
+}
+
 - (void)viewDidLoad
 {
 	//Debug: I'd actually like this to run before the view loads, and for the table view to load after this method returns. Is there a method to that effect?
@@ -125,11 +140,6 @@
 	// affects the view
     [super viewDidLoad];
 	[self setTitle:@"Recent tweets"];
-
-	// JSS: it's bad form to start loading data from the network in
-	// -viewDidLoad, as the view controller may not actually be getting
-	// presented immediately -- use -viewWillAppear: for that instead
-	[self loadUniversalTweetStream];
 }
 
 
@@ -142,25 +152,21 @@
 	void (^tweetFeedBlock)(NSData*) = ^(NSData *data){
 		[self setTweets:[data objectFromJSONData]];
 
-		// JSS: don't assign to ivars! use properties!
-		tweetTexts = [[NSMutableArray alloc] init];
+		// JSS:x don't assign to ivars! use properties!
+		self.tweetTexts = [[NSMutableArray alloc] init];
 		
-		// JSS: it's somewhat unconventional to declare these outside of the
+		// JSS:x it's somewhat unconventional to declare these outside of the
 		// loop if you only use them INSIDE (and it also makes it harder to trace
 		// through their memory management)
-		NSDictionary *tweetCurrent;
-		NSDictionary *user;
-		Tweet *tweetText;
-		NSURL *photoURL;
-		URLWrapper *tweetURLRequest;
+
 		//Fill tweetTexts from tweets:
 		for(int i = 0; i < [tweets count]; i++){
-			tweetCurrent = [tweets objectAtIndex:i];
-			user = [tweetCurrent objectForKey:@"user"];
-			photoURL = [NSURL URLWithString:[user objectForKey:@"profile_image_url"]];
-			tweetText = [[Tweet alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
+			NSDictionary *tweetCurrent = [tweets objectAtIndex:i];
+			NSDictionary *user = [tweetCurrent objectForKey:@"user"];
+			NSURL *photoURL = [NSURL URLWithString:[user objectForKey:@"profile_image_url"]];
+			Tweet *tweetText = [[Tweet alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
 			
-			tweetURLRequest = [[URLWrapper alloc] initWithURLRequest:[NSURLRequest requestWithURL:photoURL] connectionCompleted:^(NSData *data){
+			URLWrapper *tweetURLRequest = [[URLWrapper alloc] initWithURLRequest:[NSURLRequest requestWithURL:photoURL] connectionCompleted:^(NSData *data){
 				// JSS: can you figure out how to move your image creation to
 				// a background thread and then finish back on the main thread?
 				// loading or creating an image from data can be surprisingly
@@ -199,17 +205,18 @@
 
 - (void)viewDidUnload
 {
-	// JSS: calls to super in destruction and disappearance methods should be at
-	// the end (the opposite order of construction/appearance)
-    [super viewDidUnload];
+
 
     // Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;
 
-	// JSS: prefer setting properties to nil to calling -release (since it stays
+	// JSS:x prefer setting properties to nil to calling -release (since it stays
 	// correct regardless of the property's memory management semantics)
-	[userProfileViewController release];
 	userProfileViewController = nil;
+	
+	// JSS:x calls to super in destruction and disappearance methods should be at
+	// the end (the opposite order of construction/appearance)
+    [super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation

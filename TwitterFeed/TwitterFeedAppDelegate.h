@@ -5,16 +5,15 @@
 //  Created by Laura Savino on 7/1/11.
 //
 
-#import <UIKit/UIKit.h>
-#import "TweetFeedViewController.h"
-#import "UserProfileViewController.h"
+
+
+@class TweetFeedViewController;
+@class UserProfileViewController;
 
 @class TweetFeedViewController;
 
 @interface TwitterFeedAppDelegate : NSObject <UIApplicationDelegate> {
-	// JSS: no need for ivars
-	TweetFeedViewController *viewController;
-	UserProfileViewController *userProfileViewController;
+	// JSS:x no need for ivars
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;

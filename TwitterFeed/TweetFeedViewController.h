@@ -5,20 +5,18 @@
 //  Created by Laura Savino on 7/3/11.
 //
 
-#import <UIKit/UIKit.h>
-#import "Tweet.h"
-#import "URLWrapper.h"
-#import "UserProfileViewController.h"
+
+@class UserProfileViewController;
 
 @interface TweetFeedViewController : UITableViewController <UIAlertViewDelegate> { 
-	// JSS: no need for ivars
-	NSMutableArray *tweetTexts;
-	UserProfileViewController *userProfileViewController;
+	// JSS:x no need for ivars
 }
 
-// JSS: properties should be declared "nonatomic" unless you have a specific
+// JSS:x properties should be declared "nonatomic" unless you have a specific
 // reason to make them atomic
-@property (retain) NSMutableArray *tweets;
+@property (nonatomic, retain) NSMutableArray *tweets;
+@property (nonatomic, retain) NSMutableArray *tweetTexts;
+@property (nonatomic, retain) UserProfileViewController *userProfileViewController;
 
 - (void) loadUniversalTweetStream;
 

@@ -5,7 +5,11 @@
 //  Created by Laura Savino on 7/1/11.
 //
 
+#import <UIKit/UIKit.h>
+#import "TweetFeedViewController.h"
+#import "UserProfileViewController.h"
 #import "TwitterFeedAppDelegate.h"
+
 
 @implementation TwitterFeedAppDelegate
 
@@ -20,11 +24,11 @@
 {
 	// Override point for customization after application launch.
 	 
-	viewController = [[TweetFeedViewController alloc] init];
+	self.viewController = [[TweetFeedViewController alloc] init];
 
-	// JSS: leak!
-	self.navigationController = [[UINavigationController alloc] initWithRootViewController:viewController];
-	[viewController release];
+	// JSS:x leak!
+	self.navigationController = [[UINavigationController alloc] initWithRootViewController:self.viewController];
+	[self.viewController release];
 	
 	[self.window addSubview:[self.navigationController view]];
 	
@@ -79,6 +83,7 @@
 {
 	[_window release];
 	[_viewController release];
+	self.navigationController = nil;
     [super dealloc];
 }
 
