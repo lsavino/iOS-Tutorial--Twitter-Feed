@@ -66,7 +66,7 @@
 		NSString *tweetCurrent = [[[self userTweetStream] objectAtIndex:[indexPath row]] tweetText];
 		[cell.detailTextLabel setText: tweetCurrent];
 		[cell.detailTextLabel setLineBreakMode:UILineBreakModeTailTruncation];
-		[cell.detailTextLabel setNumberOfLines:0];
+		[cell.detailTextLabel setNumberOfLines:3];
 	}
 	
 	return cell;
@@ -90,13 +90,11 @@
 	self.userTweetStream = [[NSMutableArray alloc] init];
 	
 	URLWrapper *tweetStreamConnection = [[URLWrapper alloc] initWithURLRequest:tweetStreamRequest connectionCompleted:^(NSData *data){
-		NSArray *tweetStreamFull = [data objectFromJSONData];
 		
-		//Debug: What is a better way to handle this? JSON returns either array or dictionary type, but it's not clear how to differentiate at run time. 
-		char firstChar;
-		[data getBytes:&firstChar length:sizeof(char)];
-
-		if (firstChar == '{' && [tweetStreamFull objectForKey:@"error"]){
+		NSMutableArray *tweetStreamFull = [data objectFromJSONData];
+		
+		//If error was returned (because user is blocked or other reason), JSON comes back as a dictionary object of the form {error = "message", request = "/request.json"}. Otherwise, data is an array.
+		if ([tweetStreamFull respondsToSelector:@selector(objectForKey:)] && [tweetStreamFull objectForKey:@"error"]){
 			UIAlertView *userProfileAlert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"There was an error loading the requested user. Please choose another user." delegate:self cancelButtonTitle:@"ok" otherButtonTitles:nil];
 			[userProfileAlert show];
 			[userProfileAlert release];
