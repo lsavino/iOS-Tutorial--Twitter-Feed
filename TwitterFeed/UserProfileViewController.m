@@ -67,7 +67,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-	// JSS: this is more of a style thing, but try to be consistent in your
+	// JSS:x this is more of a style thing, but try to be consistent in your
 	// usage of property dot-syntax and message send syntax
 	return [self.userTweetStream count];
 }

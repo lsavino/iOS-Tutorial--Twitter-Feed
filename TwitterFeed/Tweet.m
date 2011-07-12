@@ -14,9 +14,9 @@
 
 -(id) initWithName: (NSString*) name tweetTextContent:(NSString*) tweetTextContent URL:(NSURL*) URL{
 	if(self = [super init]){
-		[self setScreenName:name];
-		[self setTweetText:tweetTextContent];
-		[self setPhotoSource:URL];
+		self.screenName = name;
+		self.tweetText = tweetTextContent;
+		self.photoSource = URL;
 	}
 	
 	return self;
@@ -36,11 +36,13 @@
 
 
 -(void) dealloc{
-	// JSS: prefer setting properties to nil to calling -release (since it stays
+	// JSS:x prefer setting properties to nil to calling -release (since it stays
 	// correct regardless of the property's memory management semantics)
 	//
-	// JSS: missing any properties here?
-	[userPhoto release];
+	// JSS:x missing any properties here?
+	self.userPhoto = nil;
+	self.tweetText = nil;
+	self.photoSource = nil;
 	[super dealloc];
 }
 

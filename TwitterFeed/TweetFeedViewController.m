@@ -66,13 +66,13 @@
 	if([indexPath row] < [self.tweetTexts count]){
 		Tweet *tweetText = [self.tweetTexts objectAtIndex:[indexPath row]];
 
-		// JSS: you can use dot-syntax for all these too, if you'd like
-		[[cell textLabel] setText:tweetText.screenName];
-		[[cell imageView] setImage:tweetText.userPhoto];
+		// JSS:x you can use dot-syntax for all these too, if you'd like
+		cell.textLabel.text = tweetText.screenName;
+		cell.imageView.image = tweetText.userPhoto;
 
-		[cell.detailTextLabel setLineBreakMode:UILineBreakModeTailTruncation];
-		[cell.detailTextLabel setNumberOfLines:3];
-		[[cell detailTextLabel] setText:tweetText.tweetText];
+		cell.detailTextLabel.lineBreakMode = UILineBreakModeTailTruncation;
+		cell.detailTextLabel.numberOfLines = 3;
+		cell.detailTextLabel.text = tweetText.tweetText;
 
 	}
 
@@ -93,10 +93,10 @@
 		self.userProfileViewController = [[UserProfileViewController alloc] init];
 	}
 	
-	// JSS: too much nesting! break it down!
+	// JSS:x too much nesting! break it down!
 	NSInteger row = [indexPath row];
 	Tweet *currentTweet = [self.tweetTexts objectAtIndex:row];
-	[self.userProfileViewController setUserScreenName:[currentTweet screenName]];
+	self.userProfileViewController.userScreenName = [currentTweet screenName];
 
 	[self.navigationController pushViewController:self.userProfileViewController animated:YES];
 	self.userProfileViewController = nil;
@@ -139,7 +139,7 @@
 	// JSS: i'm unclear why you want to run code before the view loads when it
 	// affects the view
     [super viewDidLoad];
-	[self setTitle:@"Recent tweets"];
+	self.title = @"Recent tweets";
 }
 
 
@@ -150,7 +150,7 @@
 	
 	//Callback when Twitter feed data is complete
 	void (^tweetFeedBlock)(NSData*) = ^(NSData *data){
-		[self setTweets:[data objectFromJSONData]];
+		self.tweets = [data objectFromJSONData];
 
 		// JSS:x don't assign to ivars! use properties!
 		self.tweetTexts = [[NSMutableArray alloc] init];
@@ -172,7 +172,7 @@
 				// loading or creating an image from data can be surprisingly
 				// expensive
 				UIImage *userPhoto = [[UIImage alloc] initWithData:data];
-				[tweetText setUserPhoto:userPhoto];
+				tweetText.userPhoto = userPhoto;
 				[userPhoto release];
 				[[self tableView] reloadData];
 			}];

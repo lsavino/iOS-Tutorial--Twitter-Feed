@@ -28,13 +28,9 @@
 
 	// JSS:x leak!
 	self.navigationController = [[UINavigationController alloc] initWithRootViewController:self.viewController];
-	[self.viewController release];
+	self.viewController = nil; //Question: Is this correct here? I'm passing off control of it to the navigationController, so I shouldn't need to keep a reference to it here, right?
 	
 	[self.window addSubview:[self.navigationController view]];
-	
-	
-//	userProfileViewController = [[UserProfileViewController alloc] init];
-//	[self.window addSubview:[userProfileViewController view]];
 	[self.window makeKeyAndVisible];
 	
     return YES;
