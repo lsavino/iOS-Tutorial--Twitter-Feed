@@ -87,12 +87,16 @@
 	
 //	NSURLRequest *tweetStreamRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1/statuses/user_timeline/%@.json", @"LeonardoDoreen4"]]];
 	
-	
 	self.userTweetStream = [[NSMutableArray alloc] init];
 	
 	URLWrapper *tweetStreamConnection = [[URLWrapper alloc] initWithURLRequest:tweetStreamRequest connectionCompleted:^(NSData *data){
 		NSArray *tweetStreamFull = [data objectFromJSONData];
-		if ([(NSDictionary*)tweetStreamFull objectForKey:@"error"]) {
+		
+		//Debug: What is a better way to handle this? JSON returns either array or dictionary type, but it's not clear how to differentiate at run time. 
+		char firstChar;
+		[data getBytes:&firstChar length:sizeof(char)];
+
+		if (firstChar == '{' && [tweetStreamFull objectForKey:@"error"]){
 			UIAlertView *userProfileAlert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"There was an error loading the requested user. Please choose another user." delegate:self cancelButtonTitle:@"ok" otherButtonTitles:nil];
 			[userProfileAlert show];
 			[userProfileAlert release];
