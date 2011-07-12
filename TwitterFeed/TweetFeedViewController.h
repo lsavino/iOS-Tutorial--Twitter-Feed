@@ -17,6 +17,7 @@
 @property (nonatomic, retain) NSMutableArray *tweets;
 @property (nonatomic, retain) NSMutableArray *tweetTexts;
 @property (nonatomic, retain) UserProfileViewController *userProfileViewController;
+@property (nonatomic, retain) NSString* alertTextReload; //Debug: I tried making this part of a private interface, but couldn't get it to compile. Leaving it here for now, and will include it as part of general cleanup.
 
 - (void) loadUniversalTweetStream;
 

@@ -17,13 +17,17 @@
 
 @implementation TweetFeedViewController
 
-@synthesize tweets, tweetTexts, userProfileViewController;
+@synthesize tweets = m_tweets;
+@synthesize tweetTexts = m_tweetTexts;
+@synthesize userProfileViewController = m_userProfileViewController;
+@synthesize alertTextReload = m_alertTextReload;
 
 - (id)init{
 	// JSS: initializers are allowed to return an object different from the
 	// current value of "self" -- consequently, you should ALWAYS assign the
 	// result to "self" (which is, after all, just a variable)
 	[super initWithStyle:UITableViewStyleGrouped];
+	self.alertTextReload = @"retry";
 	return self;
 }
 
@@ -43,7 +47,8 @@
 - (void) alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
 	// JSS: try not to use magic numbers -- UIAlertView has properties for
 	// identifying *what* a given button index is
-	if(buttonIndex == 1){
+	NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
+	if([buttonTitle isEqualToString:self.alertTextReload]){
 		[self loadUniversalTweetStream];
 	}
 }
@@ -145,7 +150,7 @@
 
 - (void) loadUniversalTweetStream{
 	NSURL *feedURL = [NSURL URLWithString:@"https://api.twitter.com/statuses/public_timeline.json"];
-	//NSURL *feedURL = [NSURL URLWithString:@"https://awefawoeighlariueghiaeruksiergh.com"];
+//	NSURL *feedURL = [NSURL URLWithString:@"https://awefawoeighlariueghiaeruksiergh.com"];
 	NSURLRequest *twitterRequest = [NSURLRequest requestWithURL:feedURL];
 	
 	//Callback when Twitter feed data is complete
@@ -160,8 +165,8 @@
 		// through their memory management)
 
 		//Fill tweetTexts from tweets:
-		for(int i = 0; i < [tweets count]; i++){
-			NSDictionary *tweetCurrent = [tweets objectAtIndex:i];
+		for(int i = 0; i < [self.tweets count]; i++){
+			NSDictionary *tweetCurrent = [self.tweets objectAtIndex:i];
 			NSDictionary *user = [tweetCurrent objectForKey:@"user"];
 			NSURL *photoURL = [NSURL URLWithString:[user objectForKey:@"profile_image_url"]];
 			Tweet *tweetText = [[Tweet alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
@@ -179,7 +184,7 @@
 			
 			[tweetURLRequest start];
 			
-			[tweetTexts addObject:tweetText];
+			[self.tweetTexts addObject:tweetText];
 			[tweetText release];
 			
 			[tweetURLRequest release]; 
@@ -190,7 +195,7 @@
 	// JSS: what if one of your specific tweet requests fails?
 	void (^failBlock)() = ^(){
 		NSLog(@"Fail callback.");
-		UIAlertView *tweetConnectionFail = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Connection error; please try again." delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:@"retry", nil];
+		UIAlertView *tweetConnectionFail = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Connection error; please try again." delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:self.alertTextReload, nil];
 		[tweetConnectionFail show];
 		[tweetConnectionFail release];
 		
@@ -212,7 +217,7 @@
 
 	// JSS:x prefer setting properties to nil to calling -release (since it stays
 	// correct regardless of the property's memory management semantics)
-	userProfileViewController = nil;
+	self.userProfileViewController = nil;
 	
 	// JSS:x calls to super in destruction and disappearance methods should be at
 	// the end (the opposite order of construction/appearance)
