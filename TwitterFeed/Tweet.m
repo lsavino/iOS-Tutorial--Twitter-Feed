@@ -23,6 +23,9 @@
 }
 
 -(id) initWithTweetText: (NSString*) tweetTextContent{
+	// JSS: initializers are allowed to return an object different from the
+	// current value of "self" -- consequently, you should ALWAYS assign the
+	// result to "self" (which is, after all, just a variable)
 	[self initWithName:nil tweetTextContent:tweetTextContent URL:nil];
 	return self;
 }
@@ -33,6 +36,10 @@
 
 
 -(void) dealloc{
+	// JSS: prefer setting properties to nil to calling -release (since it stays
+	// correct regardless of the property's memory management semantics)
+	//
+	// JSS: missing any properties here?
 	[userPhoto release];
 	[super dealloc];
 }

@@ -9,12 +9,15 @@
 
 
 @interface Tweet : NSObject {
+	// JSS: no need for ivars
     NSURL *photoSource;
 	NSString *screenName;
 	NSString *tweetText;
 	UIImage *userPhoto;
 }
 
+// JSS: properties should be declared "nonatomic" unless you have a specific
+// reason to make them atomic (like if this class were meant to be thread-safe)
 @property (retain) NSURL *photoSource;
 @property (retain) NSString *screenName;
 @property (retain) NSString *tweetText;

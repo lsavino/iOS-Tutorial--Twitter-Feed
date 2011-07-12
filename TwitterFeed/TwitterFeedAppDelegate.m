@@ -21,6 +21,8 @@
 	// Override point for customization after application launch.
 	 
 	viewController = [[TweetFeedViewController alloc] init];
+
+	// JSS: leak!
 	self.navigationController = [[UINavigationController alloc] initWithRootViewController:viewController];
 	[viewController release];
 	

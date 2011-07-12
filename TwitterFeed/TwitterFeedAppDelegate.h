@@ -12,7 +12,7 @@
 @class TweetFeedViewController;
 
 @interface TwitterFeedAppDelegate : NSObject <UIApplicationDelegate> {
-	
+	// JSS: no need for ivars
 	TweetFeedViewController *viewController;
 	UserProfileViewController *userProfileViewController;
 }

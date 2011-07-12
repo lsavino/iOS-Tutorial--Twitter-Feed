@@ -17,6 +17,7 @@
 
 -(id) initWithURLRequest: (NSURLRequest*) request connectionCompleted: (void (^)(NSData* id)) connectionCompletedBlock connectionFailed: (void (^)()) connectionFailedBlock{
 	if(self = [super init]){
+		// JSS: you can use dot-syntax for these, if you'd like
 		[self setConnectionDidFinishBlock:connectionCompletedBlock];
 		[self setURLConnection:[NSURLConnection connectionWithRequest:request delegate:self]];
 		[self setConnectionDidFailBlock:connectionFailedBlock];
@@ -68,6 +69,9 @@
 
 
 -(void) dealloc{
+	// JSS: this is an extremely unorthodox and actually *dangerous* way to
+	// release properties -- instead, just set it to nil and let its memory
+	// management policy take care of it for you
 	[self.URLData release];
 	[[self connectionDidFinishBlock] release];
 	[self.URLConnection release];
