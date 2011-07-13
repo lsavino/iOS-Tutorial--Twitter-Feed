@@ -13,7 +13,7 @@
 @synthesize photoSource, screenName, tweetText, userPhoto;
 
 -(id) initWithName: (NSString*) name tweetTextContent:(NSString*) tweetTextContent URL:(NSURL*) URL{
-	if(self = [super init]){
+	if((self = [super init])){
 		self.screenName = name;
 		self.tweetText = tweetTextContent;
 		self.photoSource = URL;
