@@ -29,9 +29,6 @@
 }
 
 -(id) initWithTweetText: (NSString*) tweetTextContent{
-	// JSS:x initializers are allowed to return an object different from the
-	// current value of "self" -- consequently, you should ALWAYS assign the
-	// result to "self" (which is, after all, just a variable)
 	self = [self initWithName:nil tweetTextContent:tweetTextContent URL:nil];
 	return self;
 }
@@ -42,10 +39,6 @@
 
 
 -(void) dealloc{
-	// JSS:x prefer setting properties to nil to calling -release (since it stays
-	// correct regardless of the property's memory management semantics)
-	//
-	// JSS:x missing any properties here?
 	self.userPhoto = nil;
 	self.tweetText = nil;
 	self.photoSource = nil;

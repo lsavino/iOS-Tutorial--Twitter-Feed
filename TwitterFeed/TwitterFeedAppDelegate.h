@@ -13,7 +13,6 @@
 @class TweetFeedViewController;
 
 @interface TwitterFeedAppDelegate : NSObject <UIApplicationDelegate> {
-	// JSS:x no need for ivars
 }
 
 @property (nonatomic, retain) IBOutlet UIWindow *window;

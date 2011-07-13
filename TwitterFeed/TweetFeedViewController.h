@@ -9,11 +9,8 @@
 @class UserProfileViewController;
 
 @interface TweetFeedViewController : UITableViewController  { 
-	// JSS:x no need for ivars
 }
 
-// JSS:x properties should be declared "nonatomic" unless you have a specific
-// reason to make them atomic
 @property (nonatomic, retain) NSMutableArray *tweets;
 
 

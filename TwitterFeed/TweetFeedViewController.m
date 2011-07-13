@@ -37,9 +37,6 @@
 @synthesize didLoadInitialData = m_didLoadInitialData;
 
 - (id)init{
-	// JSS:x initializers are allowed to return an object different from the
-	// current value of "self" -- consequently, you should ALWAYS assign the
-	// result to "self" (which is, after all, just a variable)
 	self = [self initWithStyle:UITableViewStyleGrouped];
 	return self;
 }
@@ -52,13 +49,7 @@
 	return self;
 }
 
-// JSS:x try to group protocol methods in a meaningful way, so that they're all
-// easy to find
-
-
 - (void) alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
-	// JSS:x try not to use magic numbers -- UIAlertView has properties for
-	// identifying *what* a given button index is
 	NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
 	if([buttonTitle isEqualToString:self.alertTextReload]){
 		[self loadUniversalTweetStream];
@@ -71,9 +62,6 @@
 
 - (UITableViewCell *) tableView:(UITableView *)tableView 
 		  cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-	// JSS:x usually, reuse identifiers are pulled out into a single variable
-	// (rather than passed in as literal strings) so that they only have to be
-	// changed or defined in one place
 	static NSString *cellIdentifier = @"UITableViewCell";
 	
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
@@ -85,7 +73,6 @@
 	if([indexPath row] < [self.tweetTexts count]){
 		Tweet *tweetText = [self.tweetTexts objectAtIndex:[indexPath row]];
 
-		// JSS:x you can use dot-syntax for all these too, if you'd like
 		cell.textLabel.text = tweetText.screenName;
 		cell.imageView.image = tweetText.userPhoto;
 
@@ -106,13 +93,10 @@
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 	
-	// JSS:x you don't need to go to the app delegate for this -- this view
-	// controller has a "navigationViewController" property
 	if(self.userProfileViewController == nil){
 		self.userProfileViewController = [[[UserProfileViewController alloc] init] autorelease];
 	}
 	
-	// JSS:x too much nesting! break it down!
 	NSInteger row = [indexPath row];
 	Tweet *currentTweet = [self.tweetTexts objectAtIndex:row];
 	self.userProfileViewController.userScreenName = [currentTweet screenName];
@@ -129,10 +113,7 @@
 
 - (void)didReceiveMemoryWarning
 {
-    // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
 }
 
 #pragma mark - View lifecycle
@@ -140,9 +121,6 @@
 - (void)viewWillAppear:(BOOL)animated{
 	[super viewWillAppear:animated];
 	
-	// JSS:x it's bad form to start loading data from the network in
-	// -viewDidLoad, as the view controller may not actually be getting
-	// presented immediately -- use -viewWillAppear: for that instead
 	if(!self.didLoadInitialData){
 		[self loadUniversalTweetStream];
 		self.didLoadInitialData = YES;
@@ -151,9 +129,7 @@
 
 - (void)viewDidLoad
 {
-	// JSS:x i'm unclear why you want to run code before the view loads when it
-	// affects the view
-    [super viewDidLoad];
+	[super viewDidLoad];
 	self.title = @"Recent tweets";
 }
 
@@ -169,12 +145,7 @@
 		
 		self.tweets = [data objectFromJSONData];
 
-		// JSS:x don't assign to ivars! use properties!
 		self.tweetTexts = [[[NSMutableArray alloc] init] autorelease];
-		
-		// JSS:x it's somewhat unconventional to declare these outside of the
-		// loop if you only use them INSIDE (and it also makes it harder to trace
-		// through their memory management)
 
 		//Fill tweetTexts from tweets:
 		int tweetIndex = 0;
@@ -184,10 +155,6 @@
 			Tweet *tweetText = [[Tweet alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
 			
 			URLWrapper *tweetURLRequest = [[URLWrapper alloc] initWithURLRequest:[NSURLRequest requestWithURL:photoURL] connectionCompleted:^(NSData *data){
-				// JSS:x can you figure out how to move your image creation to
-				// a background thread and then finish back on the main thread?
-				// loading or creating an image from data can be surprisingly
-				// expensive
 
 				dispatch_async(photoQueue,^{
 					UIImage *userPhoto = [[UIImage alloc] initWithData:data];
@@ -231,8 +198,6 @@
 }
 
 - (void)releaseProperties{
-	// JSS:x prefer setting properties to nil to calling -release (since it stays
-	// correct regardless of the property's memory management semantics)
 	self.tweetTexts = nil;
 	self.tweets = nil;
 	self.userProfileViewController = nil;
@@ -240,12 +205,7 @@
 
 - (void)viewDidUnload
 {
-	// JSS:x prefer setting properties to nil to calling -release (since it stays
-	// correct regardless of the property's memory management semantics)
-	[self releaseProperties];
-	
-	// JSS:x calls to super in destruction and disappearance methods should be at
-	// the end (the opposite order of construction/appearance)
+	[self releaseProperties];	
     [super viewDidUnload];
 }
 
