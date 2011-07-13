@@ -35,19 +35,15 @@
 	// JSS: initializers are allowed to return an object different from the
 	// current value of "self" -- consequently, you should ALWAYS assign the
 	// result to "self" (which is, after all, just a variable)
-	[super initWithStyle:UITableViewStyleGrouped];
-	self.alertTextReload = @"retry";
-	self.didLoadInitialData = NO;
+	if((self = [super initWithStyle:UITableViewStyleGrouped])){
+		self.alertTextReload = @"retry";
+		self.didLoadInitialData = NO;
+	}
 	return self;
 }
 
 - (id) initWithStyle:(UITableViewStyle)style{
 	return [self init];
-}
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    return [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
 }
 
 // JSS:x try to group protocol methods in a meaningful way, so that they're all
@@ -168,20 +164,19 @@
 	
 	//Callback when Twitter feed data is complete
 	void (^tweetFeedBlock)(NSData*) = ^(NSData *data){
-		dispatch_queue_t photoQueue = dispatch_get_main_queue();
-
+		dispatch_queue_t photoQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+		
 		self.tweets = [data objectFromJSONData];
 
 		// JSS:x don't assign to ivars! use properties!
-		self.tweetTexts = [[NSMutableArray alloc] init];
+		self.tweetTexts = [[[NSMutableArray alloc] init] autorelease];
 		
 		// JSS:x it's somewhat unconventional to declare these outside of the
 		// loop if you only use them INSIDE (and it also makes it harder to trace
 		// through their memory management)
 
 		//Fill tweetTexts from tweets:
-		for(int i = 0; i < [self.tweets count]; i++){
-			NSDictionary *tweetCurrent = [self.tweets objectAtIndex:i];
+		for(NSDictionary *tweetCurrent in self.tweets){
 			NSDictionary *user = [tweetCurrent objectForKey:@"user"];
 			NSURL *photoURL = [NSURL URLWithString:[user objectForKey:@"profile_image_url"]];
 			Tweet *tweetText = [[Tweet alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
@@ -195,24 +190,24 @@
 				dispatch_async(photoQueue,^{
 					UIImage *userPhoto = [[UIImage alloc] initWithData:data];
 					tweetText.userPhoto = userPhoto;
-					[self.tableView reloadData];
+					dispatch_async( dispatch_get_main_queue(), ^{
+						[self.tableView reloadData];	
+					});
 					[userPhoto release];
-					
 				}); 
 				
 			}];
 			
-			[tweetURLRequest start];
-			
+			[tweetURLRequest start];			
+			[tweetURLRequest release]; 
+
 			[self.tweetTexts addObject:tweetText];
-			
-			[self.tableView reloadData];
-			
 			[tweetText release];
 			
-			[tweetURLRequest release]; 
-			
 		}
+		
+		[self.tableView reloadData];
+
 	};
 	
 	// JSS: what if one of your specific tweet requests fails?

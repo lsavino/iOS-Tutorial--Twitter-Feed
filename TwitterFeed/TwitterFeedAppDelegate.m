@@ -24,10 +24,10 @@
 {
 	// Override point for customization after application launch.
 	 
-	self.viewController = [[TweetFeedViewController alloc] init];
+	self.viewController = [[[TweetFeedViewController alloc] init] autorelease];
 
 	// JSS:x leak!
-	self.navigationController = [[UINavigationController alloc] initWithRootViewController:self.viewController];
+	self.navigationController = [[[UINavigationController alloc] initWithRootViewController:self.viewController] autorelease];
 	self.viewController = nil; //Question: Is this correct here? I'm passing off control of it to the navigationController, so I shouldn't need to keep a reference to it here, right?
 	
 	[self.window addSubview:[self.navigationController view]];

@@ -16,7 +16,7 @@
 @synthesize URLConnection = m_URLConnection;
 
 -(id) initWithURLRequest: (NSURLRequest*) request connectionCompleted: (void (^)(NSData* id)) connectionCompletedBlock connectionFailed: (void (^)()) connectionFailedBlock{
-	if(self = [super init]){
+	if((self = [super init])){
 		// JSS:x you can use dot-syntax for these, if you'd like
 		self.connectionDidFinishBlock = connectionCompletedBlock;
 		self.URLConnection = [NSURLConnection connectionWithRequest:request delegate:self];

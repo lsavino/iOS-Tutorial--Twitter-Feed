@@ -24,23 +24,15 @@
 	// JSS: initializers are allowed to return an object different from the
 	// current value of "self" -- consequently, you should ALWAYS assign the
 	// result to "self" (which is, after all, just a variable)
-	self = [super initWithStyle:UITableViewStyleGrouped];
+	self = [self initWithStyle:UITableViewStyleGrouped];
 	return self;
 }
 
 - (id) initWithStyle:(UITableViewStyle)style{
 	// JSS: perhaps it makes sense to reverse these two initializers, such that
 	// -init calls -initWithStyle: with a predefined style?
-	return [self init];
-}
-
-- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
-{
-    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
+	self = [super initWithStyle:style];
+	return self;;
 }
 
 - (void)dealloc
@@ -121,7 +113,7 @@
 //	NSURLRequest *tweetStreamRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1/statuses/user_timeline/%@.json", @"LeonardoDoreen4"]]];
 	
 	// JSS:x leak!
-	self.userTweetStream = [[NSMutableArray alloc] init];
+	self.userTweetStream = [[[NSMutableArray alloc] init] autorelease];
 	
 	URLWrapper *tweetStreamConnection = [[URLWrapper alloc] initWithURLRequest:tweetStreamRequest connectionCompleted:^(NSData *data){
 		
@@ -143,12 +135,9 @@
 			[userProfileAlert release];
 		}
 		else{
-			NSMutableDictionary *tweetDataFull;
-			NSMutableArray *tweetStreamFullArray = (NSMutableArray*)tweetStreamFull;
-			Tweet *tweet;
-			for(int i = 0; i < [tweetStreamFullArray count]; i++){
-				tweetDataFull = [tweetStreamFullArray objectAtIndex:i];
-				tweet = [[Tweet alloc] initWithTweetText: [tweetDataFull objectForKey:@"text"]];
+			NSMutableArray *tweetStreamFullArray = tweetStreamFull;
+			for(NSMutableDictionary *tweetDataFull in tweetStreamFullArray){
+				Tweet *tweet = [[Tweet alloc] initWithTweetText: [tweetDataFull objectForKey:@"text"]];
 				[self.userTweetStream addObject:tweet];
 				[tweet release];
 			}
