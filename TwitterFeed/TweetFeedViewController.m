@@ -7,12 +7,20 @@
 
 
 #import <UIKit/UIKit.h>
+#import <dispatch/dispatch.h>
 
 #import "UserProfileViewController.h"
 #import "TweetFeedViewController.h"
 #import "JSONKit.h"
 #import "Tweet.h"
 #import "URLWrapper.h"
+
+@interface TweetFeedViewController () <UIAlertViewDelegate>
+
+@property (nonatomic, retain) NSString *alertTextReload;
+@property (nonatomic) BOOL didLoadInitialData;
+
+@end
 
 
 @implementation TweetFeedViewController
@@ -21,6 +29,7 @@
 @synthesize tweetTexts = m_tweetTexts;
 @synthesize userProfileViewController = m_userProfileViewController;
 @synthesize alertTextReload = m_alertTextReload;
+@synthesize didLoadInitialData = m_didLoadInitialData;
 
 - (id)init{
 	// JSS: initializers are allowed to return an object different from the
@@ -28,6 +37,7 @@
 	// result to "self" (which is, after all, just a variable)
 	[super initWithStyle:UITableViewStyleGrouped];
 	self.alertTextReload = @"retry";
+	self.didLoadInitialData = NO;
 	return self;
 }
 
@@ -45,7 +55,7 @@
 
 
 - (void) alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
-	// JSS: try not to use magic numbers -- UIAlertView has properties for
+	// JSS:x try not to use magic numbers -- UIAlertView has properties for
 	// identifying *what* a given button index is
 	NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
 	if([buttonTitle isEqualToString:self.alertTextReload]){
@@ -134,14 +144,15 @@
 	// JSS:x it's bad form to start loading data from the network in
 	// -viewDidLoad, as the view controller may not actually be getting
 	// presented immediately -- use -viewWillAppear: for that instead
-	[self loadUniversalTweetStream];
+	if(!self.didLoadInitialData){
+		[self loadUniversalTweetStream];
+		self.didLoadInitialData = YES;
+	}
 }
 
 - (void)viewDidLoad
 {
-	//Debug: I'd actually like this to run before the view loads, and for the table view to load after this method returns. Is there a method to that effect?
-	//
-	// JSS: i'm unclear why you want to run code before the view loads when it
+	// JSS:x i'm unclear why you want to run code before the view loads when it
 	// affects the view
     [super viewDidLoad];
 	self.title = @"Recent tweets";
@@ -155,6 +166,8 @@
 	
 	//Callback when Twitter feed data is complete
 	void (^tweetFeedBlock)(NSData*) = ^(NSData *data){
+		dispatch_queue_t photoQueue = dispatch_get_main_queue();
+
 		self.tweets = [data objectFromJSONData];
 
 		// JSS:x don't assign to ivars! use properties!
@@ -176,15 +189,23 @@
 				// a background thread and then finish back on the main thread?
 				// loading or creating an image from data can be surprisingly
 				// expensive
-				UIImage *userPhoto = [[UIImage alloc] initWithData:data];
-				tweetText.userPhoto = userPhoto;
-				[userPhoto release];
-				[[self tableView] reloadData];
+
+				dispatch_async(photoQueue,^{
+					UIImage *userPhoto = [[UIImage alloc] initWithData:data];
+					tweetText.userPhoto = userPhoto;
+					[self.tableView reloadData];
+					[userPhoto release];
+					
+				}); 
+				
 			}];
 			
 			[tweetURLRequest start];
 			
 			[self.tweetTexts addObject:tweetText];
+			
+			[self.tableView reloadData];
+			
 			[tweetText release];
 			
 			[tweetURLRequest release]; 
