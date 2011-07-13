@@ -18,6 +18,9 @@
 	
 }
 @property (nonatomic, retain) NSMutableArray *userTweetStream;
+
+- (void)releaseProperties;
+
 @end
 
 @implementation UserProfileViewController
@@ -46,8 +49,7 @@
 	// JSS:x this is an extremely unorthodox and actually *dangerous* way to
 	// release properties -- instead, just set it to nil and let its memory
 	// management policy take care of it for you
-	self.userScreenName = nil;
-	self.userTweetStream = nil;
+	[self releaseProperties];
     [super dealloc];
 }
 
@@ -157,6 +159,11 @@
 
 }
 
+- (void)releaseProperties{
+	self.userScreenName = nil;
+	self.userTweetStream = nil;
+}
+
 // JSS:x view controllers should generally be agnostic as to how or from where
 //// they're presented (i.e., it might not be the main screen you're returning to)
 //
@@ -174,10 +181,10 @@
 {
 
 
-	// JSS: if you find yourself with a lot of cleanup shared between
+	// JSS:x if you find yourself with a lot of cleanup shared between
 	// -viewDidUnload and -dealloc, it can make sense to abstract it out into
 	// a single method
-	self.userScreenName = nil;
+	[self releaseProperties];
 
 	// Release any retained subviews of the main view.
     // e.g. self.myOutlet = nil;

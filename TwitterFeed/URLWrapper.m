@@ -73,6 +73,7 @@
 	// management policy take care of it for you
 	self.URLData = nil;
 	self.connectionDidFinishBlock = nil;
+	self.connectionDidFailBlock = nil;
 	self.URLConnection = nil;
 	[super dealloc];
 }

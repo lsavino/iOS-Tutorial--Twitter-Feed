@@ -23,6 +23,7 @@
 @property (nonatomic, retain) UserProfileViewController *userProfileViewController;
 
 - (void) loadUniversalTweetStream;
+- (void)releaseProperties;
 
 @end
 
@@ -39,15 +40,16 @@
 	// JSS:x initializers are allowed to return an object different from the
 	// current value of "self" -- consequently, you should ALWAYS assign the
 	// result to "self" (which is, after all, just a variable)
-	if((self = [super initWithStyle:UITableViewStyleGrouped])){
-		self.alertTextReload = @"retry";
-		self.didLoadInitialData = NO;
-	}
+	self = [self initWithStyle:UITableViewStyleGrouped];
 	return self;
 }
 
 - (id) initWithStyle:(UITableViewStyle)style{
-	return [self init];
+	if((self = [super initWithStyle:style])){
+		self.alertTextReload = @"retry";
+		self.didLoadInitialData = NO;
+	}
+	return self;
 }
 
 // JSS:x try to group protocol methods in a meaningful way, so that they're all
@@ -107,7 +109,7 @@
 	// JSS:x you don't need to go to the app delegate for this -- this view
 	// controller has a "navigationViewController" property
 	if(self.userProfileViewController == nil){
-		self.userProfileViewController = [[UserProfileViewController alloc] init];
+		self.userProfileViewController = [[[UserProfileViewController alloc] init] autorelease];
 	}
 	
 	// JSS:x too much nesting! break it down!
@@ -116,17 +118,12 @@
 	self.userProfileViewController.userScreenName = [currentTweet screenName];
 
 	[self.navigationController pushViewController:self.userProfileViewController animated:YES];
-	self.userProfileViewController = nil;
 
 }
 
 - (void)dealloc
 {
-	// JSS:x prefer setting properties to nil to calling -release (since it stays
-	// correct regardless of the property's memory management semantics)
-	self.tweetTexts = nil;
-	self.tweets = nil;
-	self.userProfileViewController = nil;
+	[self releaseProperties];
     [super dealloc];
 }
 
@@ -186,7 +183,7 @@
 			Tweet *tweetText = [[Tweet alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
 			
 			URLWrapper *tweetURLRequest = [[URLWrapper alloc] initWithURLRequest:[NSURLRequest requestWithURL:photoURL] connectionCompleted:^(NSData *data){
-				// JSS: can you figure out how to move your image creation to
+				// JSS:x can you figure out how to move your image creation to
 				// a background thread and then finish back on the main thread?
 				// loading or creating an image from data can be surprisingly
 				// expensive
@@ -230,16 +227,19 @@
 
 }
 
-- (void)viewDidUnload
-{
-
-
-    // Release any retained subviews of the main view.
-    // e.g. self.myOutlet = nil;
-
+- (void)releaseProperties{
 	// JSS:x prefer setting properties to nil to calling -release (since it stays
 	// correct regardless of the property's memory management semantics)
+	self.tweetTexts = nil;
+	self.tweets = nil;
 	self.userProfileViewController = nil;
+}
+
+- (void)viewDidUnload
+{
+	// JSS:x prefer setting properties to nil to calling -release (since it stays
+	// correct regardless of the property's memory management semantics)
+	[self releaseProperties];
 	
 	// JSS:x calls to super in destruction and disappearance methods should be at
 	// the end (the opposite order of construction/appearance)
