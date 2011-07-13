@@ -73,14 +73,16 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-	// JSS: usually, reuse identifiers are pulled out into a single variable
+	// JSS:x usually, reuse identifiers are pulled out into a single variable
 	// (rather than passed in as literal strings) so that they only have to be
 	// changed or defined in one place
-	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"UITableViewCell"];
+	static NSString *cellIdentifier = @"UITableViewCell";
+	
+	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
 	if(cell == nil){
 		// JSS:x NEVER bracket an assignment in a message send -- extremely
 		// offputting and may not do what you expect
-		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:@"UITableViewCell"] autorelease];
+		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:cellIdentifier] autorelease];
 	}
 	
 	if([indexPath row] < [self.userTweetStream count]){
