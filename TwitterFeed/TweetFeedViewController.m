@@ -177,6 +177,7 @@
 		// through their memory management)
 
 		//Fill tweetTexts from tweets:
+		int tweetIndex = 0;
 		for(NSDictionary *tweetCurrent in self.tweets){
 			NSDictionary *user = [tweetCurrent objectForKey:@"user"];
 			NSURL *photoURL = [NSURL URLWithString:[user objectForKey:@"profile_image_url"]];
@@ -192,7 +193,9 @@
 					UIImage *userPhoto = [[UIImage alloc] initWithData:data];
 					tweetText.userPhoto = userPhoto;
 					dispatch_async( dispatch_get_main_queue(), ^{
-						[self.tableView reloadData];	
+						NSIndexPath *indexPath = [NSIndexPath indexPathForRow:tweetIndex inSection:0];
+						NSArray *indexPaths = [NSArray arrayWithObject:indexPath];
+						[self.tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
 					});
 					[userPhoto release];
 				}); 
@@ -200,11 +203,11 @@
 			}];
 			
 			[tweetURLRequest start];			
-			[tweetURLRequest release]; 
+			[tweetURLRequest release];
 
 			[self.tweetTexts addObject:tweetText];
 			[tweetText release];
-			
+			tweetIndex++;
 		}
 		
 		[self.tableView reloadData];
