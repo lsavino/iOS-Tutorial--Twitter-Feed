@@ -5,12 +5,9 @@
 //  Created by Laura Savino on 7/8/11.
 //
 
-@interface UserProfileViewController : UITableViewController <UIAlertViewDelegate> {
+@interface UserProfileViewController : UITableViewController {
 }
 
 @property (nonatomic, retain) NSString *userScreenName;
-@property (nonatomic, retain) NSMutableArray *userTweetStream;
-
--(void) returnToMainScreen;
 
 @end

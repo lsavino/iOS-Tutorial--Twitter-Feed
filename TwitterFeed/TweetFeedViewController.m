@@ -19,6 +19,10 @@
 
 @property (nonatomic, retain) NSString *alertTextReload;
 @property (nonatomic) BOOL didLoadInitialData;
+@property (nonatomic, retain) NSMutableArray *tweetTexts;
+@property (nonatomic, retain) UserProfileViewController *userProfileViewController;
+
+- (void) loadUniversalTweetStream;
 
 @end
 
@@ -32,7 +36,7 @@
 @synthesize didLoadInitialData = m_didLoadInitialData;
 
 - (id)init{
-	// JSS: initializers are allowed to return an object different from the
+	// JSS:x initializers are allowed to return an object different from the
 	// current value of "self" -- consequently, you should ALWAYS assign the
 	// result to "self" (which is, after all, just a variable)
 	if((self = [super initWithStyle:UITableViewStyleGrouped])){

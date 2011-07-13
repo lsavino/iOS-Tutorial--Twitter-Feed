@@ -15,9 +15,6 @@
 // JSS:x properties should be declared "nonatomic" unless you have a specific
 // reason to make them atomic
 @property (nonatomic, retain) NSMutableArray *tweets;
-@property (nonatomic, retain) NSMutableArray *tweetTexts;
-@property (nonatomic, retain) UserProfileViewController *userProfileViewController;
 
-- (void) loadUniversalTweetStream;
 
 @end

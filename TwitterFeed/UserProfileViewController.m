@@ -14,6 +14,12 @@
 // JSS:x As a rule of thumb, almost all imports should be private. Header files
 // can use the @class statement when they need to reference other classes.
 
+@interface UserProfileViewController ()  <UIAlertViewDelegate>{
+	
+}
+@property (nonatomic, retain) NSMutableArray *userTweetStream;
+@end
+
 @implementation UserProfileViewController
 
 @synthesize userScreenName = m_userScreenName;
@@ -21,7 +27,7 @@
 
 
 - (id)init{
-	// JSS: initializers are allowed to return an object different from the
+	// JSS:x initializers are allowed to return an object different from the
 	// current value of "self" -- consequently, you should ALWAYS assign the
 	// result to "self" (which is, after all, just a variable)
 	self = [self initWithStyle:UITableViewStyleGrouped];
@@ -29,7 +35,7 @@
 }
 
 - (id) initWithStyle:(UITableViewStyle)style{
-	// JSS: perhaps it makes sense to reverse these two initializers, such that
+	// JSS:x perhaps it makes sense to reverse these two initializers, such that
 	// -init calls -initWithStyle: with a predefined style?
 	self = [super initWithStyle:style];
 	return self;;
@@ -151,11 +157,13 @@
 
 }
 
-// JSS: view controllers should generally be agnostic as to how or from where
-// they're presented (i.e., it might not be the main screen you're returning to)
-- (void)returnToMainScreen{
-	
-}
+// JSS:x view controllers should generally be agnostic as to how or from where
+//// they're presented (i.e., it might not be the main screen you're returning to)
+//
+//Removing this function; may add functionality later to dismiss user profile view on alert view dismissal
+//- (void)returnToMainScreen{
+//	
+//}
 
 - (void)viewWillDisappear:(BOOL)animated{
 	
