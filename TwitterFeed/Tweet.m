@@ -7,10 +7,16 @@
 
 #import "Tweet.h"
 
+@interface Tweet ()
+-(NSString *) description;
+@end
 
 @implementation Tweet
 
-@synthesize photoSource, screenName, tweetText, userPhoto;
+@synthesize photoSource = m_photoSource;
+@synthesize screenName = m_screenName;
+@synthesize tweetText = m_tweetText;
+@synthesize userPhoto = m_userPhoto;
 
 -(id) initWithName: (NSString*) name tweetTextContent:(NSString*) tweetTextContent URL:(NSURL*) URL{
 	if((self = [super init])){
@@ -23,15 +29,15 @@
 }
 
 -(id) initWithTweetText: (NSString*) tweetTextContent{
-	// JSS: initializers are allowed to return an object different from the
+	// JSS:x initializers are allowed to return an object different from the
 	// current value of "self" -- consequently, you should ALWAYS assign the
 	// result to "self" (which is, after all, just a variable)
-	[self initWithName:nil tweetTextContent:tweetTextContent URL:nil];
+	self = [self initWithName:nil tweetTextContent:tweetTextContent URL:nil];
 	return self;
 }
 
 -(NSString *) description{
-	return [NSString stringWithFormat:@"screenName: %@, tweetText: %@", screenName, tweetText];
+	return [NSString stringWithFormat:@"screenName: %@, tweetText: %@", self.screenName, self.tweetText];
 }
 
 

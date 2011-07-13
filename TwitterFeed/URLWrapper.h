@@ -14,8 +14,8 @@
 
 // JSS:x properties should be declared "nonatomic" unless you have a specific
 // reason to make them atomic (like if this class were meant to be thread-safe)
-@property (copy) void (^connectionDidFinishBlock)(NSData *data);
-@property (copy) void (^connectionDidFailBlock)();
+@property (nonatomic, copy) void (^connectionDidFinishBlock)(NSData *data);
+@property (nonatomic, copy) void (^connectionDidFailBlock)();
 @property (nonatomic, retain) NSMutableData *URLData;
 @property (nonatomic, retain) NSURLConnection *URLConnection;
 
