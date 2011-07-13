@@ -151,7 +151,7 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>UIApplication</string>
 					<string>UIResponder</string>
-					<string>TwitterFeedViewController</string>
+					<string>TweetFeedViewController</string>
 					<string>{{234, 376}, {320, 480}}</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<string>{{525, 346}, {320, 480}}</string>
@@ -192,12 +192,14 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>navigationController</string>
 							<string>userProfileViewController</string>
 							<string>viewController</string>
 							<string>window</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>UINavigationController</string>
 							<string>UserProfileViewController</string>
 							<string>TweetFeedViewController</string>
 							<string>UIWindow</string>
@@ -207,12 +209,17 @@
 						<bool key="EncodedWithXMLCoder">YES</bool>
 						<object class="NSArray" key="dict.sortedKeys">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<string>navigationController</string>
 							<string>userProfileViewController</string>
 							<string>viewController</string>
 							<string>window</string>
 						</object>
 						<object class="NSMutableArray" key="dict.values">
 							<bool key="EncodedWithXMLCoder">YES</bool>
+							<object class="IBToOneOutletInfo">
+								<string key="name">navigationController</string>
+								<string key="candidateClassName">UINavigationController</string>
+							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">userProfileViewController</string>
 								<string key="candidateClassName">UserProfileViewController</string>
@@ -234,7 +241,7 @@
 				</object>
 				<object class="IBPartialClassDescription">
 					<string key="className">UserProfileViewController</string>
-					<string key="superclassName">UIViewController</string>
+					<string key="superclassName">UITableViewController</string>
 					<object class="IBClassDescriptionSource" key="sourceIdentifier">
 						<string key="majorKey">IBProjectSource</string>
 						<string key="minorKey">./Classes/UserProfileViewController.h</string>
