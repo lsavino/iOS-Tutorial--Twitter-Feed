@@ -17,10 +17,22 @@
 
 @interface TweetFeedViewController () <UIAlertViewDelegate>
 
+/*
+ * Collection of 20 most recent tweets from public timeline. 
+ * Each tweet is an NSDictionary object with information 
+ * about the specific tweet as well as the user account.
+ */
+@property (nonatomic, retain) NSMutableArray *tweets;
+
+/*
+ * Button text for failed connection; clicking this button will attempt to reload data without changing parameters.
+ */
 @property (nonatomic, retain) NSString *alertTextReload;
+
+/*
+ * This app only requests the most recent 20 tweets once; this ensures the table isn't reloaded with a fresh request.
+ */
 @property (nonatomic) BOOL didLoadInitialData;
-@property (nonatomic, retain) NSMutableArray *tweetTexts;
-@property (nonatomic, retain) UserProfileViewController *userProfileViewController;
 
 - (void) loadUniversalTweetStream;
 - (void)releaseProperties;
@@ -31,8 +43,6 @@
 @implementation TweetFeedViewController
 
 @synthesize tweets = m_tweets;
-@synthesize tweetTexts = m_tweetTexts;
-@synthesize userProfileViewController = m_userProfileViewController;
 @synthesize alertTextReload = m_alertTextReload;
 @synthesize didLoadInitialData = m_didLoadInitialData;
 
@@ -49,6 +59,9 @@
 	return self;
 }
 
+/*
+ * If user selected option to reload data, attempt connection again.
+ */
 - (void) alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
 	NSString *buttonTitle = [alertView buttonTitleAtIndex:buttonIndex];
 	if([buttonTitle isEqualToString:self.alertTextReload]){
@@ -56,12 +69,16 @@
 	}
 }
 
+/*
+ * Display one row per tweet returned (usually 20).
+ */
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-	return [self.tweetTexts count];
+	return [self.tweets count];
 }
 
 - (UITableViewCell *) tableView:(UITableView *)tableView 
 		  cellForRowAtIndexPath:(NSIndexPath *)indexPath{
+	
 	static NSString *cellIdentifier = @"UITableViewCell";
 	
 	UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier];
@@ -70,15 +87,16 @@
 		cell = [[[UITableViewCell alloc] initWithStyle:UITableViewCellStyleSubtitle reuseIdentifier:cellIdentifier] autorelease]; 
 	}
 	
-	if([indexPath row] < [self.tweetTexts count]){
-		Tweet *tweetText = [self.tweetTexts objectAtIndex:[indexPath row]];
-
-		cell.textLabel.text = tweetText.screenName;
-		cell.imageView.image = tweetText.userPhoto;
+	//Populate cell with data from URL connection only if the data has already been successfully returned.
+	if([indexPath row] < [self.tweets count]){
+		Tweet *currentTweet = [self.tweets objectAtIndex:[indexPath row]];
+		NSDictionary *currentTweetData = currentTweet.tweetData;
+		cell.textLabel.text = [[currentTweetData objectForKey:@"user"] objectForKey:@"screen_name"];
+		cell.imageView.image = currentTweet.userPhoto;
 
 		cell.detailTextLabel.lineBreakMode = UILineBreakModeTailTruncation;
 		cell.detailTextLabel.numberOfLines = 3;
-		cell.detailTextLabel.text = tweetText.tweetText;
+		cell.detailTextLabel.text = [currentTweet.tweetData objectForKey:@"text"];
 
 	}
 
@@ -93,15 +111,13 @@
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
 	[tableView deselectRowAtIndexPath:indexPath animated:YES];
 	
-	if(self.userProfileViewController == nil){
-		self.userProfileViewController = [[[UserProfileViewController alloc] init] autorelease];
-	}
-	
+	UserProfileViewController *userProfileViewController = [[UserProfileViewController alloc] init];
 	NSInteger row = [indexPath row];
-	Tweet *currentTweet = [self.tweetTexts objectAtIndex:row];
-	self.userProfileViewController.userScreenName = [currentTweet screenName];
+	Tweet *currentTweet = [self.tweets objectAtIndex:row];
+	userProfileViewController.userScreenName = [[currentTweet.tweetData objectForKey:@"user"] objectForKey:@"screen_name"];
 
-	[self.navigationController pushViewController:self.userProfileViewController animated:YES];
+	[self.navigationController pushViewController:userProfileViewController animated:YES];
+	[userProfileViewController release];
 
 }
 
@@ -139,23 +155,21 @@
 //	NSURL *feedURL = [NSURL URLWithString:@"https://awefawoeighlariueghiaeruksiergh.com"];
 	NSURLRequest *twitterRequest = [NSURLRequest requestWithURL:feedURL];
 	
-	//Callback when Twitter feed data is complete
+	//Block to call when Twitter feed data is completely returned
 	void (^tweetFeedBlock)(NSData*) = ^(NSData *data){
 		dispatch_queue_t photoQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+		self.tweets = [[[NSMutableArray alloc] init] autorelease];
 		
-		self.tweets = [data objectFromJSONData];
-
-		self.tweetTexts = [[[NSMutableArray alloc] init] autorelease];
+		NSArray *tweetDataFromConnection = [data objectFromJSONData];
 
 		//Fill tweetTexts from tweets:
 		int tweetIndex = 0;
-		for(NSDictionary *tweetCurrent in self.tweets){
+		for(NSDictionary *tweetCurrent in tweetDataFromConnection){
 			NSDictionary *user = [tweetCurrent objectForKey:@"user"];
 			NSURL *photoURL = [NSURL URLWithString:[user objectForKey:@"profile_image_url"]];
-			Tweet *tweetText = [[Tweet alloc] initWithName:[user objectForKey:@"screen_name"] tweetTextContent:[tweetCurrent objectForKey:@"text"] URL:photoURL];
+			Tweet *tweetText = [[Tweet alloc] initWithDictionary:tweetCurrent];
 			
-			URLWrapper *tweetURLRequest = [[URLWrapper alloc] initWithURLRequest:[NSURLRequest requestWithURL:photoURL] connectionCompleted:^(NSData *data){
-
+			void (^tweetConnectionCompletedBlock)(NSData*) = ^(NSData *data){
 				dispatch_async(photoQueue,^{
 					UIImage *userPhoto = [[UIImage alloc] initWithData:data];
 					tweetText.userPhoto = userPhoto;
@@ -166,13 +180,18 @@
 					});
 					[userPhoto release];
 				}); 
-				
-			}];
+			};
+			
+			void (^tweetConnectionFailedBlock)(NSError*) = ^(NSError *error){
+				NSLog(@"Tweet image load error: %@", error);
+			};
+			
+			URLWrapper *tweetURLRequest = [[URLWrapper alloc] initWithURLRequest:[NSURLRequest requestWithURL:photoURL] connectionCompleted:tweetConnectionCompletedBlock connectionFailed:tweetConnectionFailedBlock];
 			
 			[tweetURLRequest start];			
 			[tweetURLRequest release];
-
-			[self.tweetTexts addObject:tweetText];
+			
+			[self.tweets addObject:tweetText];
 			[tweetText release];
 			tweetIndex++;
 		}
@@ -181,12 +200,12 @@
 
 	};
 	
-	// JSS: what if one of your specific tweet requests fails?
-	void (^failBlock)() = ^(){
-		NSLog(@"Fail callback.");
+	void (^failBlock)(NSError*) = ^(NSError *error){
+		NSLog(@"Tweet connection error: %@", error);
 		UIAlertView *tweetConnectionFail = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Connection error; please try again." delegate:self cancelButtonTitle:@"cancel" otherButtonTitles:self.alertTextReload, nil];
 		[tweetConnectionFail show];
 		[tweetConnectionFail release];
+		self.tweets = nil;
 		
 	};
 	
@@ -198,9 +217,7 @@
 }
 
 - (void)releaseProperties{
-	self.tweetTexts = nil;
 	self.tweets = nil;
-	self.userProfileViewController = nil;
 }
 
 - (void)viewDidUnload

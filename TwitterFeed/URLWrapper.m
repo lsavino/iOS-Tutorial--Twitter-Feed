@@ -7,6 +7,14 @@
 
 #import "URLWrapper.h"
 
+@interface URLWrapper (){
+	
+}
+
+@property (nonatomic, retain) NSMutableData *URLData;
+@property (nonatomic, retain) NSURLConnection *URLConnection;
+
+@end
 
 @implementation URLWrapper
 
@@ -15,7 +23,7 @@
 @synthesize URLData = m_URLData;
 @synthesize URLConnection = m_URLConnection;
 
--(id) initWithURLRequest: (NSURLRequest*) request connectionCompleted: (void (^)(NSData* id)) connectionCompletedBlock connectionFailed: (void (^)()) connectionFailedBlock{
+-(id) initWithURLRequest: (NSURLRequest*) request connectionCompleted: (void (^)(NSData* id)) connectionCompletedBlock connectionFailed: (void (^)(NSError*)) connectionFailedBlock{
 	if((self = [super init])){
 		self.connectionDidFinishBlock = connectionCompletedBlock;
 		self.URLConnection = [NSURLConnection connectionWithRequest:request delegate:self];
@@ -23,11 +31,6 @@
 	}
 	
 	return self;
-}
-
-
--(id) initWithURLRequest: (NSURLRequest*) request connectionCompleted: (void (^)(NSData* id)) connectionCompletedBlock{
-	return [self initWithURLRequest:request connectionCompleted:connectionCompletedBlock connectionFailed:nil];
 }
 
 -(void) start{
@@ -57,11 +60,11 @@
 
 -(void) connection:(NSURLConnection *)connection didFailWithError:(NSError *)error{
 	//DEBUG: Cocoa documentation says to release the connection & data here, but then my app crashes with a double release. 
-//	[connection release];
-//	[self.URLData release];
+	
 	if(self.connectionDidFailBlock){
-		self.connectionDidFailBlock();
+		self.connectionDidFailBlock(error);
 	}
+	
 	NSLog(@"error~~~~~~~");
 }
 

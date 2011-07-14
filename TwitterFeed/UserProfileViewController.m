@@ -16,6 +16,7 @@
 }
 @property (nonatomic, retain) NSMutableArray *userTweetStream;
 
+- (void)fetchUserTweetStream;
 - (void)releaseProperties;
 
 @end
@@ -44,10 +45,7 @@
 
 - (void)didReceiveMemoryWarning
 {
-    // Releases the view if it doesn't have a superview.
     [super didReceiveMemoryWarning];
-    
-    // Release any cached data, images, etc that aren't in use.
 }
 
 
@@ -68,9 +66,9 @@
 	}
 	
 	if([indexPath row] < [self.userTweetStream count]){
-		NSString *tweetCurrent = [[self.userTweetStream objectAtIndex:[indexPath row]] tweetText];
+		NSDictionary *tweetCurrent = [self.userTweetStream objectAtIndex:[indexPath row]];
 
-		cell.detailTextLabel.text = tweetCurrent;
+		cell.detailTextLabel.text = [tweetCurrent objectForKey:@"text"];
 		cell.detailTextLabel.lineBreakMode = UILineBreakModeTailTruncation;
 		cell.detailTextLabel.numberOfLines = 3;
 	}
@@ -81,7 +79,6 @@
 #pragma mark - View lifecycle
 
 
-// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad
 {
     [super viewDidLoad];
@@ -90,42 +87,48 @@
 - (void) viewWillAppear:(BOOL)animated{
 	[super viewWillAppear:animated];
 	
+	//Set view title with user screen name
 	self.title = self.userScreenName;
+	[self fetchUserTweetStream];
 
-	NSString *tweetStreamSource = [NSString stringWithFormat:@"https://api.twitter.com/1/statuses/user_timeline/%@.json", self.userScreenName];
+}
+
+//Fetch stream of most recent tweets from designated user
+
+- (void)fetchUserTweetStream{
+		NSString *tweetStreamSource = [NSString stringWithFormat:@"https://api.twitter.com/1/statuses/user_timeline/%@.json", self.userScreenName];
 	NSURL *tweetStreamURL = [NSURL URLWithString:tweetStreamSource];
 	NSURLRequest *tweetStreamRequest = [NSURLRequest requestWithURL:tweetStreamURL];
 	
-//	NSURLRequest *tweetStreamRequest = [NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"https://api.twitter.com/1/statuses/user_timeline/%@.json", @"LeonardoDoreen4"]]];
-	
 	self.userTweetStream = [[[NSMutableArray alloc] init] autorelease];
 	
-	URLWrapper *tweetStreamConnection = [[URLWrapper alloc] initWithURLRequest:tweetStreamRequest connectionCompleted:^(NSData *data){
-		
+	//Block for connection completion
+	void (^tweetStreamConnectionSuccess)(NSData*) = ^(NSData *data){
 		id tweetStreamFull = [data objectFromJSONData];
 		
-		//If error was returned (because user is blocked or other reason), JSON comes back as a dictionary object of the form {error = "message", request = "/request.json"}. Otherwise, data is an array.
-
+		//Error case: if user is blocked or other error occurs, JSON comes back as a dictionary object of the form {error = "message", request = "/request.json"}
 		if ([tweetStreamFull isKindOfClass:[NSDictionary class]] && [tweetStreamFull objectForKey:@"error"]){
 			UIAlertView *userProfileAlert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"There was an error loading the requested user. Please choose another user." delegate:self cancelButtonTitle:@"ok" otherButtonTitles:nil];
 			[userProfileAlert show];
 			[userProfileAlert release];
 		}
+		
+		//Success case: data is array of NSDictionary objects. Set userTweetStream, which serves as data source for table rows
 		else{
-			NSMutableArray *tweetStreamFullArray = tweetStreamFull;
-			for(NSMutableDictionary *tweetDataFull in tweetStreamFullArray){
-				Tweet *tweet = [[Tweet alloc] initWithTweetText: [tweetDataFull objectForKey:@"text"]];
-				[self.userTweetStream addObject:tweet];
-				[tweet release];
-			}
+			self.userTweetStream = tweetStreamFull;
 			[self.tableView reloadData];
-			tweetStreamFullArray = nil;
 		}
-	}];
+		
+	};
+	
+	void (^tweetStreamConnectionFailBlock)(NSError*) = ^(NSError *error){
+		NSLog(@"User stream load error: %@", error);
+	};
+	
+	URLWrapper *tweetStreamConnection = [[URLWrapper alloc] initWithURLRequest:tweetStreamRequest connectionCompleted:tweetStreamConnectionSuccess connectionFailed:tweetStreamConnectionFailBlock];
 	
 	[tweetStreamConnection start];
 	[tweetStreamConnection release];
-
 }
 
 - (void)releaseProperties{
@@ -134,7 +137,7 @@
 }
 
 - (void)viewWillDisappear:(BOOL)animated{
-	
+	[self releaseProperties];
 	[super viewWillDisappear:animated];
 }
 
@@ -146,7 +149,6 @@
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-    // Return YES for supported orientations
     return (interfaceOrientation == UIInterfaceOrientationPortrait);
 }
 

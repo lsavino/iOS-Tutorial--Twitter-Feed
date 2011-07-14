@@ -13,35 +13,28 @@
 
 @implementation Tweet
 
-@synthesize photoSource = m_photoSource;
-@synthesize screenName = m_screenName;
-@synthesize tweetText = m_tweetText;
+@synthesize tweetData = m_tweetData;
 @synthesize userPhoto = m_userPhoto;
 
--(id) initWithName: (NSString*) name tweetTextContent:(NSString*) tweetTextContent URL:(NSURL*) URL{
+- (id)initWithDictionary: (NSDictionary *) dataDictionary{
 	if((self = [super init])){
-		self.screenName = name;
-		self.tweetText = tweetTextContent;
-		self.photoSource = URL;
+		self.tweetData = dataDictionary;
 	}
 	
 	return self;
 }
 
--(id) initWithTweetText: (NSString*) tweetTextContent{
-	self = [self initWithName:nil tweetTextContent:tweetTextContent URL:nil];
-	return self;
-}
-
 -(NSString *) description{
-	return [NSString stringWithFormat:@"screenName: %@, tweetText: %@", self.screenName, self.tweetText];
+	NSDictionary *user = [self.tweetData objectForKey:@"user"];
+	NSString *userName = [user objectForKey:@"screen_name"];
+	NSString *tweetText = [self.tweetData objectForKey:@"text"];
+	return [NSString stringWithFormat:@"screenName: %@, tweetText: %@", userName, tweetText];
 }
 
 
 -(void) dealloc{
 	self.userPhoto = nil;
-	self.tweetText = nil;
-	self.photoSource = nil;
+	self.tweetData = nil;
 	[super dealloc];
 }
 

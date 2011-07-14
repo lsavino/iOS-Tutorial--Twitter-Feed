@@ -15,7 +15,6 @@
 
 
 @synthesize window=_window;
-@synthesize userProfileViewController = _userProfileViewController;
 @synthesize navigationController = m_navigationController;
 
 @synthesize viewController=_viewController;
