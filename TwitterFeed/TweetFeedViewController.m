@@ -160,8 +160,15 @@
 		dispatch_queue_t photoQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
 		self.tweets = [[[NSMutableArray alloc] init] autorelease];
 		
-		NSArray *tweetDataFromConnection = [data objectFromJSONData];
-
+		id tweetDataFromConnection = [data objectFromJSONData];
+		
+		if([tweetDataFromConnection isKindOfClass:[NSDictionary class]] && [tweetDataFromConnection objectForKey:@"error"]){
+			UIAlertView *tweetFeedAlert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"There was an error loading the requested feed. Please try again later." delegate:nil cancelButtonTitle:@"ok" otherButtonTitles:nil];
+			[tweetFeedAlert show];
+			[tweetFeedAlert release];
+			return;
+		}
+		
 		//Fill tweetTexts from tweets:
 		int tweetIndex = 0;
 		for(NSDictionary *tweetCurrent in tweetDataFromConnection){
